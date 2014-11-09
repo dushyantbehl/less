@@ -1,0 +1,8 @@
+*.o
+core
+less
+lesskey
+lessecho
+config.*
+defines.h
+Makefile*
