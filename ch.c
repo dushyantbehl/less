@@ -177,6 +177,61 @@ void ch_emoji_to_unicode(struct buf* bp, int choffset)
     }
 }
 
+/* Unit test for testing ch_emoji_to_unicode */
+bool test_emoji_to_unicode()
+{
+    struct buf _bp;
+    struct buf* bp = &_bp;
+
+    int offset=2;
+
+    char str[] = ":-:-):-(-:";
+    char str2[] = ":-:-):-(-:";
+
+    if ( ch_emoji_to_unicode(NULL,10) == 0 )
+    {
+        printf("TEST FAIL: BP NULL\n");
+        return false;
+    }
+
+    if ( ch_emoji_to_unicode(bp,-10) == 0 )
+    {
+        printf("TEST FAIL: Offset negative\n");
+        return false;
+    }
+
+    if ( ch_emoji_to_unicode(bp,LBUFSIZE) != 0 )
+    {
+        printf("TEST FAIL: Offset more than LBUFSIZE\n");
+        return false;
+    }
+
+    int SMILEY_UNICODE  = 0x00ba98e2;  /* Memory representation of "\u263A" */
+    int SAD_UNICODE     = 0x00b998e2;  /* Memory representation of "\u2639" */
+
+    int unicode = sizeof(SMILEY_UNICODE)-1;   //Same for SAD_UNICODE
+
+    memcpy(str2+offset, &SMILEY_UNICODE, unicode);
+    memcpy(&str2[offset+unicode], &SAD_UNICODE, unicode);
+
+    memcpy(bp->data, str, sizeof(str));
+
+    if ( ch_emoji_to_unicode(bp,0) != 0 )
+    {
+        printf("TEST FAIL: Normal test returned -1\n");
+        return false;
+    }
+
+    if ( memcmp(str2,bp->data,sizeof(str2)) != 0 )
+    {
+        printf("TEST FAIL: Output not proper\n");
+        return false;
+    }
+
+    printf("TEST PASS: %s\n",bp->data);
+    return true;
+}
+
 /*
  * Get the character pointed to by the read pointer.
  */
