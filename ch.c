@@ -139,6 +139,43 @@ extern char *namelogfile;
 
 static int ch_addbuf();
 
+/* Function to change emoticons in the text file to their unicode equivalents */
+void ch_emoji_to_unicode(struct buf* bp, int choffset)
+{
+    int SMILEY_UNICODE  = 0x00ba98e2;  /* Memory representation of "\u263A" */
+    int SAD_UNICODE     = 0x00b998e2;  /* Memory representation of "\u2639" */
+
+    int unicode = sizeof(SMILEY_UNICODE)-1;   //Same for SAD_UNICODE
+
+    /* We start from the character offset because
+     * we don't want to repeat the check */
+    int i=choffset;
+    int shift = 0;
+
+    while (i<LBUFSIZE-2)
+    {
+        if (bp->data[i] == ':')
+        {
+            if (bp->data[i+1] == '-')
+            {
+                shift = 2;
+                if (bp->data[i+2] == ')')
+                {   /* Smiley detected */
+                    memcpy((bp->data)+i, &SMILEY_UNICODE, unicode);
+                    shift = unicode;
+                }
+                else if (bp->data[i+2] == '(')
+                {   /* Sad face detected */
+                    memcpy((bp->data)+i, &SAD_UNICODE, unicode);
+                    shift = unicode;
+                }
+                i += shift;
+                continue;
+            }
+        }
+        i++;
+    }
+}
 
 /*
  * Get the character pointed to by the read pointer.
@@ -367,6 +404,7 @@ ch_get()
 		 */
 		goto read_more;
 
+    ch_emoji_to_unicode(bp,ch_offset);
 	return (bp->data[ch_offset]);
 }
 
