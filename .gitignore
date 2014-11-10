@@ -1,6 +1,7 @@
 *.o
 core
 less
+stamp-h
 lesskey
 lessecho
 config.*
